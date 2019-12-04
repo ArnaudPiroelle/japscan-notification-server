@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package com.arnaudpiroelle.notifier;
+
+message ProgressResponse {
+    repeated Agent agents = 1;
+}
+
+message Agent {
+    string name = 1;
+    int32 downloadedManga = 2;
+    int32 totalManga = 3;
+    repeated Task tasks = 4;
+}
+
+message Task {
+    string name = 1;
+    string manga = 2;
+    string chapter = 3;
+    int32 currentChapter = 4;
+    int32 totalChapter = 5;
+    int32 currentPage = 6;
+    int32 totalPage = 7;
+}
+
+message SubscribeRequest { }
+
+message NotifyRequest {
+    Agent agent = 1;
+}
+
+message NotifyResponse {
+    bool success = 1;
+}
+
+service NotifierService {
+    rpc subscribe(SubscribeRequest) returns (stream ProgressResponse);
+
+    rpc notify(NotifyRequest) returns (NotifyResponse);
+
+}

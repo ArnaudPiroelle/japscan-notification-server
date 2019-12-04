@@ -1,0 +1,61 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.3.50'
+    id 'com.google.protobuf' version '0.8.10'
+    id "java"
+    id "idea"
+    id 'application'
+}
+
+group 'com.arnaudpiroelle'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+def grpcVersion = '1.25.0'
+def reactiveGrpcVersion = '1.0.0'
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation("io.grpc:grpc-netty-shaded:${grpcVersion}")
+    implementation("io.grpc:grpc-protobuf:${grpcVersion}")
+    implementation("io.grpc:grpc-stub:${grpcVersion}")
+    implementation "com.salesforce.servicelibs:rxgrpc-stub:${reactiveGrpcVersion}"
+}
+
+sourceSets {
+    main.java.srcDirs += 'build/generated/source/proto/main/java'
+    main.java.srcDirs += 'build/generated/source/proto/main/grpc'
+    main.java.srcDirs += 'build/generated/source/proto/main/rxgrpc'
+}
+
+sourceCompatibility = 1.8
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+    dependsOn('generateProto')
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+protobuf {
+    protoc { artifact = 'com.google.protobuf:protoc:3.10.1' }
+    plugins {n
+        grpc { artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}" }
+        rxgrpc {
+            artifact = "com.salesforce.servicelibs:rxgrpc:${reactiveGrpcVersion}"
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+            rxgrpc {}
+        }
+    }
+}
+
+application {
+    mainClassName = 'com.arnaudpiroelle.notifier.ServerKt'
+}
